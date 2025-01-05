@@ -1,7 +1,7 @@
-# Gestor de Finanças Pessoais
+# MoneyFlow
 
 ## Descrição
-O Gestor de Finanças Pessoais é uma aplicação web para organizar, monitorar e visualizar suas finanças. Ele oferece funcionalidades para criar categorias de gastos, registrar valores e gerar relatórios com gráficos interativos.
+O MoneyFlow é uma aplicação web para organizar, monitorar e visualizar suas finanças. Ele oferece funcionalidades para criar categorias de gastos, registrar valores e gerar relatórios com gráficos interativos.
 
 ## Funcionalidades
 - Tela de login com autenticação de usuário.
@@ -12,4 +12,3 @@ O Gestor de Finanças Pessoais é uma aplicação web para organizar, monitorar 
 - **Frontend:** HTML, CSS, JavaScript.
 - **Backend:** Node.js.
 - **Banco de Dados:** SQL Server.
-
