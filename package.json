@@ -1,0 +1,16 @@
+{
+  "name": "moneyflow",
+  "version": "1.0.0",
+  "description": "O MoneyFlow é uma aplicação web para organizar, monitorar e visualizar suas finanças. Ele oferece funcionalidades para criar categorias de gastos, registrar valores e gerar relatórios com gráficos interativos.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "mssql": "^11.0.1"
+  }
+}
