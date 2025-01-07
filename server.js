@@ -32,4 +32,4 @@ app.post('/transacoes', (req, res) => {
 
 app.get('/saldo', (req, res) => {
     res.send('Obter saldo atual');
-});
+}); 
