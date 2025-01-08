@@ -90,8 +90,20 @@ app.post('/transacoes', async (req, res) => {
         }
 });
 
-app.get('/saldo', (req, res) => {
-    res.send('Obter saldo atual');
+// Rota para calcular o saldo atual
+app.get('/saldo', async (req, res) => {
+    try {
+        const pool = await sql.connect(dbConfig);
+        const result = await pool.request().query(`
+            SELECT 
+                SUM(CASE WHEN Tipo = 'Entrada' THEN Valor ELSE -Valor END) AS saldo
+            FROM Transacoes
+        `);
+            res.status(200).json({ saldo: result.recordser[0].saldo });
+    } catch (err) {
+        console.error('Erro ao calcular saldo:', err);
+        res.status(500).send('Erro no servirdor.');
+    }
 }); 
 
 app.listen(port, ()=> {
