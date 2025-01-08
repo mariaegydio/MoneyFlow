@@ -68,8 +68,26 @@ app.get('/transacoes', async (req, res) => {
 });
 
 // Rota para adicionar nova transação.
-app.post('/transacoes', (req, res) => {
-    res.send('Adicionar uma nova transação');
+app.post('/transacoes', async (req, res) => {
+    const { descricao, valor, tipo } = req.body;
+
+    if (!descricao || !valor || !tipo) {
+        return res.status(400).send('Todos os campos (descricao, valor, tipo) são obrigatórios.');
+    }
+
+    try {
+        const pool = await sql.connect(dbConfig);
+        await pool.request()
+            .input('descricao', sql.VarChar(50), descricao)
+            .input('valor', sql.Decimal(10, 2), valor)
+            .input('tipo', sql.VarChar(50), tipo)
+            .query('INSERT INTO Transacoes (Descricao, Valor, Tipo) VALUES (@descricao, @valor, @tipo)');
+
+            res.status(201).send('Transação adicionada com sucesso!');
+        }   catch (err) {
+            console.error('Erro ao inserir transação:', err);
+            res.status(500).send('Erro no servidor');
+        }
 });
 
 app.get('/saldo', (req, res) => {
