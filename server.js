@@ -24,16 +24,19 @@ app.get('/', (req, res) => {
 });
 
 // Rota para listar categorias.
+const { connectToDb, sql } = require('./db');
+
 app.get('/categorias', async (req, res) => {
     try {
-        const pool = await sql.connect(dbConfig);
+        const pool = await connectToDb();
         const result = await pool.request().query('SELECT * FROM Categorias');
-        res.status(200).json(result.recordset);
+        res.json(result.recordset);
     } catch (err) {
-        console.error('Erro ao listar categorias:', err);
-        res.status(500).send('Erro no servidor.');
+        console.error('Erro ao obter categorias:', err.message);
+        res.status(500).send('Erro no servidor');
     }
 });
+
 
 // Rota para adicionar novas categorias
 app.post('/categorias', async (req,res) => {
