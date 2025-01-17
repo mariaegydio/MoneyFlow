@@ -1,114 +1,100 @@
 const express = require('express');
-const bodyParser = require('bodyParser');
-const sql = require('mssql');
+const bodyParser = require('body-parser');
+const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 const port = 3000;
 
 app.use(bodyParser.json());
 
-const dbConfig = {
-    user: 'seu-uruario',
-    password: 'sua_senha',
-    server: 'seu_servidor',
-    database: 'MoneyFlow',
-    options: {
-        encrypt: true,
-        trustServerCertificate: true,
-    },
-};
+// Conectar ao banco SQLite
+const db = new sqlite3.Database('./moneyflow.db', (err) => {
+    if (err) {
+        console.error('Erro ao conectar ao banco de dados:', err.message);
+    } else {
+        console.log('Conectado ao banco de dados SQLite.');
+    }
+});
 
-// Verifica se a API está funcionando.
+// Rota para verificar se a API está funcionando
 app.get('/', (req, res) => {
-    res.send('Olá, a API está funcionando');
+    res.send('Olá, a API está funcionando!');
 });
 
-// Rota para listar categorias.
-const { connectToDb, sql } = require('./db');
-
-app.get('/categorias', async (req, res) => {
-    try {
-        const pool = await connectToDb();
-        const result = await pool.request().query('SELECT * FROM Categorias');
-        res.json(result.recordset);
-    } catch (err) {
-        console.error('Erro ao obter categorias:', err.message);
-        res.status(500).send('Erro no servidor');
-    }
-});
-
-
-// Rota para adicionar novas categorias
-app.post('/categorias', async (req,res) => {
-    const { nome } = req.body;
-
-    if (!nome) {
-        return res.status(400).send('O nome da categoria é obrigatorio.');
-    }
-
-    try {
-        const pool = await sql.connect(dbConfig);
-        await pool.request()
-        .input('nome', sql.VarChar(50), nome)
-        .query('INSERT INTO Categorias (Nome) VALUES (@nome)');
-        res.status(201).send('Categoria adicionada com sucesso!');
-    } catch (err) {
-        console.error('Erro ao inserir categoria:', err);
-        res.status(500).send('Erro no servidor.');
-    }
-});
-
-// Rota para listar todas as transações.
-app.get('/transacoes', async (req, res) => {
-    try {
-        const pool = await sql.connect(dbConfig);
-        const result = await pool.request().query('SELECT * FROM Transacoes');
-        res.status(200).json(result.recordset);
-    } catch (err) {
-        console.error('Erro ao listar transações:', err);
-        res.status(500).send('Erro no servidor.');
-    }
-});
-
-// Rota para adicionar nova transação.
-app.post('/transacoes', async (req, res) => {
-    const { descricao, valor, tipo } = req.body;
-
-    if (!descricao || !valor || !tipo) {
-        return res.status(400).send('Todos os campos (descricao, valor, tipo) são obrigatórios.');
-    }
-
-    try {
-        const pool = await sql.connect(dbConfig);
-        await pool.request()
-            .input('descricao', sql.VarChar(50), descricao)
-            .input('valor', sql.Decimal(10, 2), valor)
-            .input('tipo', sql.VarChar(50), tipo)
-            .query('INSERT INTO Transacoes (Descricao, Valor, Tipo) VALUES (@descricao, @valor, @tipo)');
-
-            res.status(201).send('Transação adicionada com sucesso!');
-        }   catch (err) {
-            console.error('Erro ao inserir transação:', err);
-            res.status(500).send('Erro no servidor');
+// Rota para listar categorias
+app.get('/categorias', (req, res) => {
+    const query = 'SELECT * FROM Categoria';
+    db.all(query, [], (err, rows) => {
+        if (err) {
+            console.error('Erro ao obter categorias:', err.message);
+            return res.status(500).send('Erro no servidor');
         }
+        res.json(rows);
+    });
+});
+
+// Rota para adicionar uma nova categoria
+app.post('/categorias', (req, res) => {
+    const { id_usuario, nome_categoria } = req.body;
+    if (!id_usuario || !nome_categoria) {
+        return res.status(400).send('ID do usuário e nome da categoria são obrigatórios');
+    }
+
+    const query = 'INSERT INTO Categoria (id_usuario, nome_categoria) VALUES (?, ?)';
+    db.run(query, [id_usuario, nome_categoria], function (err) {
+        if (err) {
+            console.error('Erro ao adicionar categoria:', err.message);
+            return res.status(500).send('Erro no servidor');
+        }
+        res.status(201).send('Categoria adicionada com sucesso!');
+    });
+});
+
+// Rota para listar transações
+app.get('/transacoes', (req, res) => {
+    const query = 'SELECT * FROM Transacoes';
+    db.all(query, [], (err, rows) => {
+        if (err) {
+            console.error('Erro ao obter transações:', err.message);
+            return res.status(500).send('Erro no servidor');
+        }
+        res.json(rows);
+    });
+});
+
+// Rota para adicionar uma nova transação
+app.post('/transacoes', (req, res) => {
+    const { id_categoria, id_usuario, tipo_transacao, valor, periodo, descricao } = req.body;
+    if (!id_categoria || !id_usuario || !tipo_transacao || !valor || !periodo) {
+        return res.status(400).send('Todos os campos são obrigatórios');
+    }
+
+    const query = 'INSERT INTO Transacoes (id_categoria, id_usuario, tipo_transacao, valor, periodo, descricao) VALUES (?, ?, ?, ?, ?, ?)';
+    db.run(query, [id_categoria, id_usuario, tipo_transacao, valor, periodo, descricao], function (err) {
+        if (err) {
+            console.error('Erro ao adicionar transação:', err.message);
+            return res.status(500).send('Erro no servidor');
+        }
+        res.status(201).send('Transação adicionada com sucesso!');
+    });
 });
 
 // Rota para calcular o saldo atual
-app.get('/saldo', async (req, res) => {
-    try {
-        const pool = await sql.connect(dbConfig);
-        const result = await pool.request().query(`
-            SELECT 
-                SUM(CASE WHEN Tipo = 'Entrada' THEN Valor ELSE -Valor END) AS saldo
-            FROM Transacoes
-        `);
-            res.status(200).json({ saldo: result.recordser[0].saldo });
-    } catch (err) {
-        console.error('Erro ao calcular saldo:', err);
-        res.status(500).send('Erro no servirdor.');
-    }
-}); 
+app.get('/saldo', (req, res) => {
+    const query = `
+        SELECT 
+            SUM(CASE WHEN tipo_transacao = 'Entrada' THEN valor ELSE -valor END) AS saldo
+        FROM Transacoes
+    `;
+    db.get(query, [], (err, row) => {
+        if (err) {
+            console.error('Erro ao calcular saldo:', err.message);
+            return res.status(500).send('Erro no servidor');
+        }
+        res.json({ saldo: row.saldo });
+    });
+});
 
-app.listen(port, ()=> {
-    console.log(`Servidor rodando na porta ${port}`)
+app.listen(port, () => {
+    console.log(`Servidor rodando na porta ${port}`);
 });
