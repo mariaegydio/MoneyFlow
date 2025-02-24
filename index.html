@@ -1,11 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Money Flow</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
+  <!-- Tela de Login: visível inicialmente -->
+  <div id="login-screen">
+    <h2>Login</h2>
+    <input type="email" id="login-email" placeholder="Digite seu e-mail">
+    <input type="password" id="login-password" placeholder="Digite sua senha">
+    <button id="login-btn">Entrar</button>
+  </div>
+
+  <!-- Tela Principal: oculta inicialmente -->
+  <div id="main-screen" class="hidden">
+    <header>
+      <button id="hamburger-btn">&#9776;</button>
+      <h1>Money Flow</h1>
+    </header>
+
+    <!-- Menu Lateral: oculta inicialmente -->
+    <nav id="side-menu" class="hidden">
+      <ul>
+        <li><a href="#" data-target="movimentacao">Movimentação do Mês</a></li>
+        <li><a href="#" data-target="historico">Histórico</a></li>
+        <li><a href="#" data-target="categorias">Categorias</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <!-- Seção: Movimentação do Mês (padrão) -->
+      <section id="movimentacao" class="page active">
+        <div id="resumo">
+          <span id="ano">2025</span>
+          <span id="despesas">Despesas: R$ 0,00</span>
+          <span id="receitas">Receitas: R$ 0,00</span>
+          <span id="saldo">Saldo: R$ 0,00</span>
+        </div>
+        <button id="add-mov-btn" class="add-btn">+</button>
+        <div id="lista-movimentacoes"></div>
+      </section>
+
+      <!-- Seção: Histórico -->
+      <section id="historico" class="page hidden">
+        <h2>Histórico</h2>
+        <div id="lista-historico"></div>
+      </section>
+
+      <!-- Seção: Categorias -->
+      <section id="categorias" class="page hidden">
+        <h2>Categorias</h2>
+        <div id="lista-categorias"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal para Adicionar Movimentação (oculto inicialmente) -->
+  <div id="modal-add" class="modal hidden">
+    <div class="modal-content">
+      <h3>Nova Movimentação</h3>
+      <input type="text" id="mov-descricao" placeholder="Descrição">
+      <input type="number" id="mov-valor" placeholder="Valor">
+      <select id="mov-tipo">
+        <option value="despesa">Gasto (Despesas)</option>
+        <option value="receita">Ganho (Receitas)</option>
+      </select>
+      <button id="salvar-mov-btn">Salvar</button>
+      <button id="cancelar-mov-btn">Cancelar</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
